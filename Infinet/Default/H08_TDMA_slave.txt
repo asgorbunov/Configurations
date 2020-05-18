@@ -1,0 +1,77 @@
+# R5000 WANFleX H08S11-TDMAv2.1.19 * Feb  3 2020 15:26:52 * SN:225871
+
+
+#Environment
+set CONFIG_GENERATED "WEB INTERFACE"
+
+#System parameters
+#Factory password mode: single
+sys name Unknown node
+sys prompt Unknown node
+sys user root
+
+#Radio module parameters
+rf rf5.0 grid 40 4890-6050/10
+rf rf5.0 grid 20 4890-6050/10
+rf rf5.0 grid 10 4890-6050/5
+rf rf5.0 grid 5 4890-6050/5
+rf rf5.0 band 20
+rf rf5.0 mimo
+rf rf5.0 freq 4920 bitr 130000 sid 10101010 burst
+rf rf5.0 txpwr 27 pwrctl 
+#  Instant DFS module installed
+
+#DFS configuration
+#   Instant DFS module installed
+
+#Interfaces parameters
+ifc lo0    127.0.0.1/32
+ifc eth0   media auto mtu 1500 up
+ifc eth0   10.10.20.1/24
+ifc rf5.0  mtu 1500 up
+ifc svi1   info "L2 Management Interface"
+ifc svi1   mtu 1500 up
+           # group 1
+ifc svi1   10.10.10.1/24
+
+#QoS manager
+qm option dot1p rtp nodscp icmp
+
+#MINT configuration
+mint rf5.0 -name "Unknown node"
+mint rf5.0 -nodeid 25871
+mint rf5.0 -type slave
+mint rf5.0 -mode fixed
+mint rf5.0 -scrambling
+mint rf5.0 -autobitrate
+mint rf5.0 -hiamp 2 -loamp 0
+mint rf5.0 -log
+mint rf5.0 prof 1 -band 20 -freq 4920 -sid 10101010 \
+	      -nodeid 25871 -type slave \
+	      -autobitr -mimo
+mint rf5.0 -roaming enable
+mint rf5.0 -authmode public
+mint rf5.0 -airupdate passive
+mint rf5.0 -rcmdserver enabled
+mint rf5.0 start
+
+mint rf5.0 tdma mode=Slave start
+
+
+#MAC Switch config
+switch group 1 add 1 eth0 rf5.0 
+switch group 1 igmp-snooping on
+switch group 1 igmp-snooping router-port on
+     # group 1 attached to 'svi1'
+switch group 1 start
+
+switch start
+
+#Switch Virtual Interface config
+svi 1 group 1
+
+#WEB configurator
+webcfg start
+
+#LLDP parameters
+lldp eth0 enable txrx
